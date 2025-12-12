@@ -1,0 +1,145 @@
+<!--
+  File: index.html
+  Purpose: Simple mobile-friendly dashboard for Kelompok 1<br>Monitoring Galon
+  - Displays: berat_total, volume_liter, status, stok
+  - Replace the firebaseConfig fields below with values from your Firebase project (apiKey/appId optional for public RTDB)
+  - Save this file and open in browser or deploy to Firebase Hosting
+-->
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monitoring Galon</title>
+  <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            padding: 40px;
+            color: #fff;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 380px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            margin: auto;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        .item {
+            margin: 15px 0;
+            font-size: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .label {
+            font-weight: 600;
+        }
+
+        .value {
+            font-weight: 700;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>📡 Monitoring Galon</h1>
+
+      <div class="row">
+        <div class="label">Total Berat</div>
+        <div id="total" class="value">0 g</div>
+      </div>
+
+      <div class="row">
+        <div class="label">Volume Air</div>
+        <div id="liter" class="value">0 L</div>
+      </div>
+
+      <div class="row">
+        <div class="label">Status Galon</div>
+        <div id="status" class="value">-</div>
+      </div>
+
+      <div class="row">
+        <div class="label">Stok Galon</div>
+        <div id="stok" class="value big">0</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    // ================== GANTI DENGAN FIREBASE CONFIG PROJECT KAMU ==================
+    const firebaseConfig = {
+      // contoh minimal:
+      // apiKey: "API_KEY",   // opsional jika DB public
+      // authDomain: "...",
+      databaseURL: "https://monitoring-galon-1f269-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "monitoring-galon-1f269",
+      // appId: "1:xxxx:web:xxxx"
+    };
+
+    // NOTE: file ini menggunakan Firebase Modular SDK (v9+). Tidak perlu authentication
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const pathRef = ref(db, 'monitoring/loadcell');
+
+    function setText(id, text){
+      const el = document.getElementById(id);
+      if(el) el.innerText = text;
+    }
+
+    onValue(pathRef, (snap)=>{
+      const d = snap.val() || {};
+
+      const total = (typeof d.berat_total !== 'undefined') ? Number(d.berat_total) : 0;
+      const liter = (typeof d.volume_liter !== 'undefined') ? Number(d.volume_liter) : 0;
+      const status = d.status || '-';
+      const stok = (typeof d.stok !== 'undefined') ? Number(d.stok) : 0;
+
+      setText('total', total.toFixed(2) + ' g');
+      setText('liter', liter.toFixed(2) + ' L');
+      setText('status', status);
+      setText('stok', stok);
+
+      // optional: color status
+      const statusEl = document.getElementById('status');
+      if(statusEl){
+        statusEl.classList.remove('status-good','status-bad');
+        if(status.toLowerCase().includes('kosong')) statusEl.classList.add('status-bad');
+        else if(status.toLowerCase().includes('penuh') || status.toLowerCase().includes('ok') || status.toLowerCase().includes('terpasang')) statusEl.classList.add('status-good');
+      }
+    });
+
+  </script>
+</body>
+</html>
