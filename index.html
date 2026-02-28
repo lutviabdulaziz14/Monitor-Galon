@@ -54,18 +54,17 @@
 <body>
   <h1>📡 Web Dashboard</h1>
 
-  <!-- PENTING: container HARUS ADA -->
   <div id="container" class="wrap"></div>
 
   <script type="module">
     // ================= FIREBASE CONFIG =================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
     const firebaseConfig = {
       databaseURL: "https://monitoring-galon-1f269-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "monitoring-galon-1f269",
     };
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
@@ -74,7 +73,7 @@
     const rootRef = ref(db, "monitoring");
 
     function formatNumber(v) {
-      return Number(v).toLocaleString("id-ID", {
+      return Number(v || 0).toLocaleString("id-ID", {
         maximumFractionDigits: 2
       });
     }
@@ -83,8 +82,7 @@
       const nama = d.nama || key;
 
       const Weight =
-        d.berat_total !== undefined ? d.berat_total :
-        d.berat_gram !== undefined ? d.berat_gram : 0;
+        d.berat_total ?? d.berat_gram ?? 0;
 
       const Volume =
         d.volume_liter !== undefined
@@ -93,9 +91,9 @@
 
       let Status = "-";
       if (d.status !== undefined) {
-        status = d.status;
+        Status = d.status;
       } else if (d.stable !== undefined) {
-        status = d.stable ? "Stabil" : "Tidak Stabil";
+        Status = d.stable ? "Stabil" : "Tidak Stabil";
       }
 
       const Stock = d.stok !== undefined ? d.stok : "-";
@@ -105,10 +103,22 @@
 
       card.innerHTML = `
         <h2>🏢 ${nama}</h2>
-        <div class="item"><span class="label">Berat</span><span class="value">${formatNumber(Weight)} gram</span></div>
-        <div class="item"><span class="label">Volume</span><span class="value">${Volume}</span></div>
-        <div class="item"><span class="label">Status</span><span class="value">${Status}</span></div>
-        <div class="item"><span class="label">Stok</span><span class="value">${stock}</span></div>
+        <div class="item">
+          <span class="label">Berat</span>
+          <span class="value">${formatNumber(Weight)} gram</span>
+        </div>
+        <div class="item">
+          <span class="label">Volume</span>
+          <span class="value">${Volume}</span>
+        </div>
+        <div class="item">
+          <span class="label">Status</span>
+          <span class="value">${Status}</span>
+        </div>
+        <div class="item">
+          <span class="label">Stok</span>
+          <span class="value">${Stock}</span>
+        </div>
       `;
 
       return card;
@@ -133,4 +143,3 @@
   </script>
 </body>
 </html>
-
