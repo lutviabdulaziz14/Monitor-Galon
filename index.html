@@ -52,7 +52,7 @@
 </head>
 
 <body>
-  <h1>📡 Monitoring Galon</h1>
+  <h1>📡 Web Dashboard</h1>
 
   <!-- PENTING: container HARUS ADA -->
   <div id="container" class="wrap"></div>
@@ -82,33 +82,33 @@
     function createCard(key, d) {
       const nama = d.nama || key;
 
-      const berat =
+      const Weight =
         d.berat_total !== undefined ? d.berat_total :
         d.berat_gram !== undefined ? d.berat_gram : 0;
 
-      const volume =
+      const Volume =
         d.volume_liter !== undefined
           ? formatNumber(d.volume_liter) + " L"
           : "-";
 
-      let status = "-";
+      let Status = "-";
       if (d.status !== undefined) {
         status = d.status;
       } else if (d.stable !== undefined) {
         status = d.stable ? "Stabil" : "Tidak Stabil";
       }
 
-      const stok = d.stok !== undefined ? d.stok : "-";
+      const Stock = d.stok !== undefined ? d.stok : "-";
 
       const card = document.createElement("div");
       card.className = "card";
 
       card.innerHTML = `
         <h2>🏢 ${nama}</h2>
-        <div class="item"><span class="label">Berat</span><span class="value">${formatNumber(berat)} gram</span></div>
-        <div class="item"><span class="label">Volume</span><span class="value">${volume}</span></div>
-        <div class="item"><span class="label">Status</span><span class="value">${status}</span></div>
-        <div class="item"><span class="label">Stok</span><span class="value">${stok}</span></div>
+        <div class="item"><span class="label">Berat</span><span class="value">${formatNumber(Weight)} gram</span></div>
+        <div class="item"><span class="label">Volume</span><span class="value">${Volume}</span></div>
+        <div class="item"><span class="label">Status</span><span class="value">${Status}</span></div>
+        <div class="item"><span class="label">Stok</span><span class="value">${stock}</span></div>
       `;
 
       return card;
@@ -133,3 +133,4 @@
   </script>
 </body>
 </html>
+
