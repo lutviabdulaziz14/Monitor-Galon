@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Galon Monitoring Dashboard - Floor 1</title>
+  <title>Multi-Device Galon Monitoring Dashboard</title>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -23,20 +23,29 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const dataRef = ref(db, 'monitoring/loadcell');
 
-    onValue(dataRef, (snapshot) => {
-      const data = snapshot.val() || {};
+    // Daftar lokasi/alat (asumsi 4 alat: Floor 1 to Floor 4)
+    // Asumsi path Firebase: 'monitoring/loadcell1', 'monitoring/loadcell2', dll.
+    // Jika path berbeda, sesuaikan array ini
+    const devices = [
+      { id: 1, path: 'monitoring/loadcell1', locationName: 'Floor 1' },
+      { id: 2, path: 'monitoring/loadcell2', locationName: 'Floor 2' },
+      { id: 3, path: 'monitoring/loadcell3', locationName: 'Floor 3' },
+      { id: 4, path: 'monitoring/loadcell4', locationName: 'Floor 4' }
+    ];
 
-      document.getElementById('location').textContent = data.nama || "Floor 1";
-      document.getElementById('weight').textContent   = (data.berat_total || 0).toFixed(0) + " g";
-      document.getElementById('stock').textContent    = data.stok  || 0;
+    // Fungsi untuk update data per device
+    function updateDeviceData(deviceId, data) {
+      const prefix = `device${deviceId}-`;
+      document.getElementById(prefix + 'location').textContent = data.nama || devices[deviceId-1].locationName;
+      document.getElementById(prefix + 'weight').textContent   = (data.berat_total || 0).toFixed(0) + " g";
+      document.getElementById(prefix + 'stock').textContent    = data.stok  || 0;
 
       const statusText = data.status || "Unknown";
-      const statusEl = document.getElementById('status');
+      const statusEl = document.getElementById(prefix + 'status');
       statusEl.textContent = statusText;
 
-      // Reset class dulu
+      // Reset class
       statusEl.className = "value status";
 
       if (statusText.toLowerCase().includes("empty") || statusText.toLowerCase() === "kosong" || statusText.toLowerCase() === "habis") {
@@ -46,10 +55,19 @@
       } else {
         statusEl.classList.add("status-ok");
       }
+    }
+
+    // Inisialisasi listener untuk setiap device
+    devices.forEach(device => {
+      const dataRef = ref(db, device.path);
+      onValue(dataRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        updateDeviceData(device.id, data);
+      });
     });
   </script>
 
-  <!-- Font Awesome untuk ikon (CDN) -->
+  <!-- Font Awesome untuk ikon -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
@@ -97,12 +115,24 @@
       opacity: 0.7;
     }
 
+    .device-group {
+      width: 100%;
+      max-width: 1100px;
+      margin-bottom: 2.5rem;
+    }
+
+    .device-header {
+      font-size: 1.4rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.2rem;
-      width: 100%;
-      max-width: 1100px;
     }
 
     .card {
@@ -170,42 +200,120 @@
       .value { font-size: 2rem; }
       .status { font-size: 1.9rem; }
       h1 { font-size: 1.5rem; }
+      .device-header { font-size: 1.2rem; }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Galon Monitoring Dashboard</h1>
-    <div class="subtitle">Floor 1 • Real-time Water Gallon Monitoring</div>
+    <h1>Multi-Device Galon Monitoring Dashboard</h1>
+    <div class="subtitle">Real-time Water Gallon Monitoring Across Multiple Locations</div>
   </header>
 
-  <div class="grid">
-
-    <div class="card">
-      <i class="fas fa-map-marker-alt"></i>
-      <div class="label">Location</div>
-      <div class="value" id="location">Floor 1</div>
+  <!-- Grup untuk setiap alat/lokasi -->
+  <div class="device-group">
+    <div class="device-header">Floor 1</div>
+    <div class="grid">
+      <div class="card">
+        <i class="fas fa-map-marker-alt"></i>
+        <div class="label">Location</div>
+        <div class="value" id="device1-location">Floor 1</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-weight-hanging"></i>
+        <div class="label">Total Weight</div>
+        <div class="value" id="device1-weight">— g</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-tachometer-alt"></i>
+        <div class="label">Status</div>
+        <div class="value status" id="device1-status">—</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-boxes-stacked"></i>
+        <div class="label">Remaining Stock</div>
+        <div class="value" id="device1-stock">—</div>
+      </div>
     </div>
+  </div>
 
-    <div class="card">
-      <i class="fas fa-weight-hanging"></i>
-      <div class="label">Total Weight</div>
-      <div class="value" id="weight">— g</div>
+  <div class="device-group">
+    <div class="device-header">Floor 2</div>
+    <div class="grid">
+      <div class="card">
+        <i class="fas fa-map-marker-alt"></i>
+        <div class="label">Location</div>
+        <div class="value" id="device2-location">Floor 2</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-weight-hanging"></i>
+        <div class="label">Total Weight</div>
+        <div class="value" id="device2-weight">— g</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-tachometer-alt"></i>
+        <div class="label">Status</div>
+        <div class="value status" id="device2-status">—</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-boxes-stacked"></i>
+        <div class="label">Remaining Stock</div>
+        <div class="value" id="device2-stock">—</div>
+      </div>
     </div>
+  </div>
 
-    <div class="card">
-      <i class="fas fa-tachometer-alt"></i>
-      <div class="label">Status</div>
-      <div class="value status" id="status">—</div>
+  <div class="device-group">
+    <div class="device-header">Floor 3</div>
+    <div class="grid">
+      <div class="card">
+        <i class="fas fa-map-marker-alt"></i>
+        <div class="label">Location</div>
+        <div class="value" id="device3-location">Floor 3</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-weight-hanging"></i>
+        <div class="label">Total Weight</div>
+        <div class="value" id="device3-weight">— g</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-tachometer-alt"></i>
+        <div class="label">Status</div>
+        <div class="value status" id="device3-status">—</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-boxes-stacked"></i>
+        <div class="label">Remaining Stock</div>
+        <div class="value" id="device3-stock">—</div>
+      </div>
     </div>
+  </div>
 
-    <div class="card">
-      <i class="fas fa-boxes-stacked"></i>
-      <div class="label">Remaining Stock</div>
-      <div class="value" id="stock">—</div>
+  <div class="device-group">
+    <div class="device-header">Floor 4</div>
+    <div class="grid">
+      <div class="card">
+        <i class="fas fa-map-marker-alt"></i>
+        <div class="label">Location</div>
+        <div class="value" id="device4-location">Floor 4</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-weight-hanging"></i>
+        <div class="label">Total Weight</div>
+        <div class="value" id="device4-weight">— g</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-tachometer-alt"></i>
+        <div class="label">Status</div>
+        <div class="value status" id="device4-status">—</div>
+      </div>
+      <div class="card">
+        <i class="fas fa-boxes-stacked"></i>
+        <div class="label">Remaining Stock</div>
+        <div class="value" id="device4-stock">—</div>
+      </div>
     </div>
-
   </div>
 
   <footer>
