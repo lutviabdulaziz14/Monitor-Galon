@@ -1,16 +1,15 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Monitoring Galon - Lantai 1</title>
+  <title>Galon Dashboard - Floor 1</title>
 
-  <!-- Firebase SDK v9 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-    // GANTI DENGAN CONFIG FIREBASE PROYEK ANDA
+    // ── GANTI DENGAN CONFIG FIREBASE ANDA ──
     const firebaseConfig = {
       apiKey:            "AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       authDomain:        "monitoring-galon-1f269.firebaseapp.com",
@@ -29,112 +28,115 @@
     onValue(dataRef, (snapshot) => {
       const data = snapshot.val() || {};
 
-      // Update tampilan
-      document.getElementById('lokasi').textContent    = data.nama  || "Lantai 1";
-      document.getElementById('berat').textContent     = (data.berat_total || 0).toFixed(0) + " gram";
-      document.getElementById('status').textContent    = data.status || "Tidak diketahui";
-      document.getElementById('stok').textContent      = data.stok  || 0;
+      document.getElementById('location').textContent = data.nama  || "Floor 1";
+      document.getElementById('weight').textContent   = (data.berat_total || 0).toFixed(0) + " g";
+      document.getElementById('status').textContent   = data.status || "Unknown";
+      document.getElementById('stock').textContent    = data.stok  || 0;
 
-      // Warna status
       const statusEl = document.getElementById('status');
-      const statusText = (data.status || "").toLowerCase();
-      
-      if (statusText.includes("kosong") || statusText === "empty") {
-        statusEl.style.color = "#e74c3c";      // merah
-        statusEl.style.fontWeight = "bold";
-      } else if (statusText.includes("hampir") || statusText === "almost empty") {
-        statusEl.style.color = "#f39c12";      // kuning/oranye
+      const st = (data.status || "").toLowerCase();
+
+      if (st.includes("empty") || st === "kosong" || st === "habis") {
+        statusEl.style.color = "#ff4d4d";
+      } else if (st.includes("almost") || st.includes("hampir")) {
+        statusEl.style.color = "#ffa500";
       } else {
-        statusEl.style.color = "#2ecc71";      // hijau
+        statusEl.style.color = "#32cd32";
       }
     });
   </script>
 
   <style>
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #0f172a;
-      color: white;
       margin: 0;
-      padding: 20px;
+      padding: 12px;
+      font-family: Arial, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
     }
+
     h1 {
-      margin: 20px 0 40px;
-      font-size: 2.1rem;
+      font-size: 1.35rem;
+      margin: 8px 0 16px;
+      text-align: center;
+      color: #58a6ff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      flex: 1;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 12px 14px;
       text-align: center;
     }
-    .container {
-      width: 100%;
-      max-width: 600px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    .card {
-      background: rgba(30, 41, 59, 0.8);
-      border-radius: 16px;
-      padding: 24px 28px;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
+
     .label {
-      font-size: 1.1rem;
-      opacity: 0.8;
-      margin-bottom: 8px;
+      font-size: 0.78rem;
+      color: #8b949e;
+      margin-bottom: 4px;
     }
+
     .value {
-      font-size: 2.8rem;
+      font-size: 1.65rem;
+      font-weight: bold;
+      margin: 2px 0;
+    }
+
+    .status.value {
+      font-size: 1.8rem;
       font-weight: 700;
-      margin: 0;
     }
-    .small {
-      font-size: 1rem;
-      opacity: 0.7;
-      margin-top: 6px;
-    }
-    @media (min-width: 600px) {
-      .container {
-        grid-template-columns: repeat(2, 1fr);
+
+    @media (max-width: 500px) {
+      .grid {
+        grid-template-columns: 1fr;
       }
       h1 {
-        font-size: 2.6rem;
+        font-size: 1.2rem;
+      }
+      .value {
+        font-size: 1.45rem;
+      }
+      .status.value {
+        font-size: 1.6rem;
       }
     }
   </style>
 </head>
 <body>
 
-  <h1>Dashboard Galon - Lantai 1</h1>
+  <h1>Galon Monitoring – Floor 1</h1>
 
-  <div class="container">
+  <div class="grid">
 
     <div class="card">
-      <div class="label">Lokasi</div>
-      <div class="value" id="lokasi">Lantai 1</div>
-      <div class="small">Posisi galon saat ini</div>
+      <div class="label">Location</div>
+      <div class="value" id="location">Floor 1</div>
     </div>
 
     <div class="card">
-      <div class="label">Berat Total</div>
-      <div class="value" id="berat">— gram</div>
-      <div class="small">Hasil pengukuran load cell</div>
+      <div class="label">Total Weight</div>
+      <div class="value" id="weight">— g</div>
     </div>
 
     <div class="card">
-      <div class="label">Status Galon</div>
-      <div class="value" id="status">—</div>
-      <div class="small">Kondisi isi galon</div>
+      <div class="label">Status</div>
+      <div class="value status" id="status">—</div>
     </div>
 
     <div class="card">
-      <div class="label">Stok Galon</div>
-      <div class="value" id="stok">—</div>
-      <div class="small">Jumlah galon cadangan</div>
+      <div class="label">Stock</div>
+      <div class="value" id="stock">—</div>
     </div>
 
   </div>
